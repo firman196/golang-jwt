@@ -1,9 +1,7 @@
-create table if not exist `tokens` (
+create table if not exists `tokens` (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    user_id INTEGER UNSIGNED KEY NOT NULL,
+    user_id INTEGER,
     token TEXT,
-    refresh_token TEXT
+    refresh_token TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(id)
 );
-
-ALTER TABLE tokens ADD FOREIGN KEY (from_users_token) REFERENCES users (id);
-ALTER TABLE tokens ADD FOREIGN KEY (to_users_token) REFERENCES users (id);
