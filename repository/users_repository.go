@@ -10,7 +10,7 @@ type UsersRepository interface {
 	Create(ctx context.Context, tx *sql.Tx, user entity.Users) entity.Users
 	Update(ctx context.Context, tx *sql.Tx, user entity.Users) entity.Users
 	Delete(ctx context.Context, tx *sql.Tx, user entity.Users) bool
-	getById(ctx context.Context, tx *sql.Tx, userId string) (entity.Users, error)
-	getByEmail(ctx context.Context, tx *sql.Tx, email string) (entity.Users, error)
-	getAll(ctx context.Context, tx *sql.Tx) []entity.Users
+	GetById(ctx context.Context, tx *sql.Tx, userId int16) (entity.Users, error)
+	GetByEmail(ctx context.Context, tx *sql.Tx, email string) (entity.Users, error)
+	GetAll(ctx context.Context, tx *sql.Tx) []entity.Users
 }
