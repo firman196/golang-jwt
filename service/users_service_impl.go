@@ -18,13 +18,13 @@ type UsersServiceImpl struct {
 	validate        *validator.Validate
 }
 
-/*func NewUserServiceImpl(userRepository repository.UsersRepository, DB *sql.DB, validate *validator.Validate) UsersService {
+func NewUserServiceImpl(userRepository repository.UsersRepository, DB *sql.DB, validate *validator.Validate) UsersService {
 	return &UsersServiceImpl{
-		UserRepository: userRepository,
-		DB:             DB,
-		validate:       validate,
+		UsersRepository: userRepository,
+		DB:              DB,
+		validate:        validate,
 	}
-}*/
+}
 
 func (service *UsersServiceImpl) Create(ctx context.Context, request users.UsersCreateRequest) users.UsersResponse {
 	err := service.validate.Struct(request)
@@ -50,12 +50,7 @@ func (service *UsersServiceImpl) Create(ctx context.Context, request users.Users
 		user,
 	)
 
-	return users.UsersResponse{
-		Id:        user.Id,
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
-		Email:     user.Email,
-	}
+	return users.UsersResponses(user)
 }
 
 func (service *UsersServiceImpl) Update(ctx context.Context, request users.UsersUpdateRequest) users.UsersResponse {
@@ -84,12 +79,7 @@ func (service *UsersServiceImpl) Update(ctx context.Context, request users.Users
 		user,
 	)
 
-	return users.UsersResponse{
-		Id:        user.Id,
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
-		Email:     user.Email,
-	}
+	return users.UsersResponses(user)
 }
 
 func (service *UsersServiceImpl) Delete(ctx context.Context, Id int16) bool {
@@ -124,12 +114,7 @@ func (service *UsersServiceImpl) GetById(ctx context.Context, Id int16) users.Us
 		Id,
 	)
 	helper.SetPanicError(err)
-	return users.UsersResponse{
-		Id:        user.Id,
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
-		Email:     user.Email,
-	}
+	return users.UsersResponses(user)
 }
 
 func (service *UsersServiceImpl) GetAll(ctx context.Context) []users.UsersResponse {
@@ -137,13 +122,13 @@ func (service *UsersServiceImpl) GetAll(ctx context.Context) []users.UsersRespon
 	helper.SetPanicError(err)
 	defer helper.Defer(tx)
 
-	users := service.UsersRepository.GetAll(
+	usersVal := service.UsersRepository.GetAll(
 		ctx,
 		tx,
 	)
 	var usersResponse []users.UsersResponse
-	for _, user := range users {
-		usersResponse = append(usersResponse, users.UsersResponse(user))
+	for _, user := range usersVal {
+		usersResponse = append(usersResponse, users.UsersResponses(user))
 	}
 	return usersResponse
 }

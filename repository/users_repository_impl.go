@@ -86,34 +86,35 @@ func (repository *UsersRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, 
 	}
 }
 
-func (repository UsersRepositoryImpl) GetByEmail(ctx context.Context, tx *sql.Tx, email string) (entity.Users, error) {
-	SQL := "SELECT id, first_name, last_name, email FROM users WHERE email = ?"
+/*
+	func (repository UsersRepositoryImpl) GetByEmail(ctx context.Context, tx *sql.Tx, email string) (entity.Users, error) {
+		SQL := "SELECT id, first_name, last_name, email FROM users WHERE email = ?"
 
-	rows, err := tx.QueryContext(
-		ctx,
-		SQL,
-		email,
-	)
-
-	helper.SetPanicError(err)
-	defer rows.Close()
-
-	user := entity.Users{}
-	if rows.Next() {
-		err := rows.Scan(
-			&user.Id,
-			&user.Firstname,
-			&user.Lastname,
-			&user.Email,
+		rows, err := tx.QueryContext(
+			ctx,
+			SQL,
+			email,
 		)
+
 		helper.SetPanicError(err)
+		defer rows.Close()
 
-		return user, nil
-	} else {
-		return user, errors.New("user not found")
+		user := entity.Users{}
+		if rows.Next() {
+			err := rows.Scan(
+				&user.Id,
+				&user.Firstname,
+				&user.Lastname,
+				&user.Email,
+			)
+			helper.SetPanicError(err)
+
+			return user, nil
+		} else {
+			return user, errors.New("user not found")
+		}
 	}
-}
-
+*/
 func (repository *UsersRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []entity.Users {
 	SQL := "SELECT id, first_name, last_name, email FROM users"
 	rows, err := tx.QueryContext(
