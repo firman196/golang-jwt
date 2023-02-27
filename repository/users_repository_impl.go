@@ -15,7 +15,7 @@ func NewUsersRepositoryImpl() UsersRepository {
 }
 
 func (repository *UsersRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, user entity.Users) entity.Users {
-	SQL := "INSERT INTO users (id, first_name, last_name, email, password) VALUES (?,?,?,?,?)"
+	SQL := "INSERT INTO users (id, firstname, lastname, email, password) VALUES (?,?,?,?,?)"
 	_, err := tx.ExecContext(
 		ctx,
 		SQL,
@@ -30,7 +30,7 @@ func (repository *UsersRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, u
 }
 
 func (repository *UsersRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, user entity.Users) entity.Users {
-	SQL := "UPDATE users SET first_name = ?, last_name = ?, email = ? WHERE id = ?"
+	SQL := "UPDATE users SET firstname = ?, lastname = ?, email = ? WHERE id = ?"
 
 	_, err := tx.ExecContext(
 		ctx,
@@ -60,7 +60,7 @@ func (repository *UsersRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, u
 }
 
 func (repository *UsersRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, userId int16) (entity.Users, error) {
-	SQL := "SELECT id, first_name, last_name, email FROM users WHERE id = ?"
+	SQL := "SELECT id, firstname, lastname, email FROM users WHERE id = ?"
 	rows, err := tx.QueryContext(
 		ctx,
 		SQL,
@@ -116,7 +116,7 @@ func (repository *UsersRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, 
 	}
 */
 func (repository *UsersRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) []entity.Users {
-	SQL := "SELECT id, first_name, last_name, email FROM users"
+	SQL := "SELECT id, firstname, lastname, email FROM users"
 	rows, err := tx.QueryContext(
 		ctx,
 		SQL,

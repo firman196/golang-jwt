@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -43,9 +44,11 @@ func main() {
 	router.GET("/api/V1/user", userController.GetAll)
 
 	server := http.Server{
-		Addr: "localhost:3000",
+		Addr:    "localhost:9000",
+		Handler: router,
 	}
 
 	err := server.ListenAndServe()
+	//fmt.Println(reflect.TypeOf(err))
 	helper.SetPanicError(err)
 }
