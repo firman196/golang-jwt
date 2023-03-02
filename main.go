@@ -3,6 +3,7 @@ package main
 import (
 	"golang-jwt/app"
 	"golang-jwt/controller"
+	exception "golang-jwt/exception/api"
 	"golang-jwt/helper"
 	"golang-jwt/repository"
 	"golang-jwt/service"
@@ -42,6 +43,8 @@ func main() {
 	router.DELETE("/api/V1/user/:id", userController.Delete)
 	router.GET("/api/V1/user/:id", userController.GetById)
 	router.GET("/api/V1/user", userController.GetAll)
+
+	router.PanicHandler = exception.ErrorHandler
 
 	server := http.Server{
 		Addr:    "localhost:9000",

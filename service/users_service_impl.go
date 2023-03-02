@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
+	exception "golang-jwt/exception/api"
 	"golang-jwt/helper"
 	"golang-jwt/model/entity"
 	"golang-jwt/model/web/users"
@@ -67,7 +68,7 @@ func (service *UsersServiceImpl) Update(ctx context.Context, request users.Users
 		request.Id,
 	)
 	if err != nil {
-		helper.SetPanicError(err)
+		panic(exception.NewBadRequestError(err.Error()))
 	}
 	user.Firstname = request.Firstname
 	user.Lastname = request.Lastname
@@ -92,7 +93,10 @@ func (service *UsersServiceImpl) Delete(ctx context.Context, Id int16) bool {
 		tx,
 		Id,
 	)
-	helper.SetPanicError(err)
+
+	if err != nil {
+		panic(exception.NewBadRequestError(err.Error()))
+	}
 
 	var result = service.UsersRepository.Delete(
 		ctx,
@@ -113,7 +117,9 @@ func (service *UsersServiceImpl) GetById(ctx context.Context, Id int16) users.Us
 		tx,
 		Id,
 	)
-	helper.SetPanicError(err)
+	if err != nil {
+		panic(exception.NewBadRequestError(err.Error()))
+	}
 	return users.UsersResponses(user)
 }
 
