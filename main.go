@@ -3,12 +3,14 @@ package main
 import (
 	"golang-jwt/app"
 	"golang-jwt/controller"
+	exception "golang-jwt/exception/api"
 	"golang-jwt/helper"
 	"golang-jwt/repository"
 	"golang-jwt/service"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -42,10 +44,14 @@ func main() {
 	router.GET("/api/V1/user/:id", userController.GetById)
 	router.GET("/api/V1/user", userController.GetAll)
 
+	router.PanicHandler = exception.ErrorHandler
+
 	server := http.Server{
-		Addr: "localhost:3000",
+		Addr:    "localhost:9000",
+		Handler: router,
 	}
 
 	err := server.ListenAndServe()
+	//fmt.Println(reflect.TypeOf(err))
 	helper.SetPanicError(err)
 }
