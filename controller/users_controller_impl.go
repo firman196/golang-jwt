@@ -28,7 +28,6 @@ func (controller *UsersControllerImpl) Create(writer http.ResponseWriter, reques
 	response := controller.UsersService.Create(request.Context(), userCreateRequest)
 	webResponse := web.GeneralResponse{
 		Status: "success",
-		Code:   200,
 		Data:   response,
 	}
 
@@ -38,11 +37,12 @@ func (controller *UsersControllerImpl) Create(writer http.ResponseWriter, reques
 func (controller *UsersControllerImpl) Update(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 	userUpdateRequest := users.UsersUpdateRequest{}
 	helper.JsonDecode(request, &userUpdateRequest)
+	userId, err := strconv.Atoi(params.ByName("id"))
+	helper.SetPanicError(err)
 
-	response := controller.UsersService.Update(request.Context(), userUpdateRequest)
+	response := controller.UsersService.Update(request.Context(), int16(userId), userUpdateRequest)
 	webResponse := web.GeneralResponse{
 		Status: "success",
-		Code:   200,
 		Data:   response,
 	}
 
@@ -56,7 +56,6 @@ func (controller *UsersControllerImpl) Delete(writer http.ResponseWriter, reques
 	controller.UsersService.Delete(request.Context(), int16(userId))
 	response := web.GeneralResponse{
 		Status: "success",
-		Code:   200,
 	}
 	helper.JsonEncode(writer, response)
 }
@@ -70,7 +69,6 @@ func (controller *UsersControllerImpl) GetById(writer http.ResponseWriter, reque
 
 	response := web.GeneralResponse{
 		Status: "success",
-		Code:   200,
 		Data:   data,
 	}
 	helper.JsonEncode(writer, response)
@@ -81,7 +79,6 @@ func (controller *UsersControllerImpl) GetAll(writer http.ResponseWriter, reques
 
 	response := web.GeneralResponse{
 		Status: "success",
-		Code:   200,
 		Data:   datas,
 	}
 

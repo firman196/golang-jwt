@@ -7,7 +7,7 @@ import (
 
 type UsersService interface {
 	Create(ctx context.Context, request users.UsersCreateRequest) users.UsersResponse
-	Update(ctx context.Context, request users.UsersUpdateRequest) users.UsersResponse
+	Update(ctx context.Context, Id int16, request users.UsersUpdateRequest) users.UsersResponse
 	Delete(ctx context.Context, Id int16) bool
 	GetById(ctx context.Context, Id int16) users.UsersResponse
 	//GetByEmail(ctx context.Context, email string) users.UsersResponse

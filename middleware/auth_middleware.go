@@ -19,7 +19,7 @@ func NewAuthMiddleware(handler http.Handler) *AuthMiddleware {
 	}
 }
 
-func (middleware *AuthMiddleware) ServerHttp(writer http.ResponseWriter, request *http.Request) {
+func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == "POST" && (request.RequestURI == "/api/v1/user" || request.RequestURI == "/api/v1/auth") {
 		middleware.Handler.ServeHTTP(writer, request)
 	} else {

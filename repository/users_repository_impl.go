@@ -29,7 +29,7 @@ func (repository *UsersRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, u
 	return user
 }
 
-func (repository *UsersRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, user entity.Users) entity.Users {
+func (repository *UsersRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, userId int16, user entity.Users) entity.Users {
 	SQL := "UPDATE users SET firstname = ?, lastname = ?, email = ? WHERE id = ?"
 
 	_, err := tx.ExecContext(

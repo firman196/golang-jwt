@@ -54,7 +54,7 @@ func (service *UsersServiceImpl) Create(ctx context.Context, request users.Users
 	return users.UsersResponses(user)
 }
 
-func (service *UsersServiceImpl) Update(ctx context.Context, request users.UsersUpdateRequest) users.UsersResponse {
+func (service *UsersServiceImpl) Update(ctx context.Context, Id int16, request users.UsersUpdateRequest) users.UsersResponse {
 	err := service.validate.Struct(request)
 	helper.SetPanicError(err)
 
@@ -65,7 +65,7 @@ func (service *UsersServiceImpl) Update(ctx context.Context, request users.Users
 	user, err := service.UsersRepository.GetById(
 		ctx,
 		tx,
-		request.Id,
+		Id,
 	)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))
@@ -77,6 +77,7 @@ func (service *UsersServiceImpl) Update(ctx context.Context, request users.Users
 	user = service.UsersRepository.Update(
 		ctx,
 		tx,
+		Id,
 		user,
 	)
 

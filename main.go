@@ -49,9 +49,9 @@ func main() {
 	server := http.Server{
 		Addr:    "localhost:9000",
 		Handler: router,
+		//Handler: middleware.NewAuthMiddleware(router),
 	}
 
 	err := server.ListenAndServe()
-	//fmt.Println(reflect.TypeOf(err))
 	helper.SetPanicError(err)
 }

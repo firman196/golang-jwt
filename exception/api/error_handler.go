@@ -1,4 +1,4 @@
-package exception
+package api
 
 import (
 	"golang-jwt/helper"
