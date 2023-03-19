@@ -6,32 +6,6 @@ import (
 	"net/http"
 )
 
-// ---- Bad Request Err ----//
-type BadRequestError struct {
-	Error string
-}
-
-func NewBadRequestError(error string) BadRequestError {
-	return BadRequestError{
-		Error: error,
-	}
-}
-
-//---- End Bad Request Err ----//
-
-// ---- Unautorized Request Err ----//
-type UnautorizedRequestError struct {
-	Error string
-}
-
-func NewUnautorizedRequestError(error string) UnautorizedRequestError {
-	return UnautorizedRequestError{
-		Error: error,
-	}
-}
-
-//---- End Unautorized Request Err ----//
-
 func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interface{}) {
 	if badRequest(writer, request, err) {
 		return
@@ -98,7 +72,7 @@ func internalServerError(writer http.ResponseWriter, request *http.Request, erro
 }
 
 func unauthorized(writer http.ResponseWriter, request *http.Request, error interface{}) bool {
-	exception, err := error.(UnautorizedRequestError)
+	exception, err := error.(UnauthorizedError)
 	if err {
 		writer.Header().Set("Content-Type", "application/json")
 		writer.WriteHeader(http.StatusBadRequest)

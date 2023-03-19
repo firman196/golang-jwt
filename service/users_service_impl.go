@@ -3,8 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
-
-	"github.com/go-playground/validator/v10"
+	"fmt"
 
 	exception "golang-jwt/exception/api"
 	"golang-jwt/helper"
@@ -16,10 +15,10 @@ import (
 type UsersServiceImpl struct {
 	UsersRepository repository.UsersRepository
 	DB              *sql.DB
-	validate        *validator.Validate
+	validate        *exception.Validation
 }
 
-func NewUserServiceImpl(userRepository repository.UsersRepository, DB *sql.DB, validate *validator.Validate) UsersService {
+func NewUserServiceImpl(userRepository repository.UsersRepository, DB *sql.DB, validate *exception.Validation) UsersService {
 	return &UsersServiceImpl{
 		UsersRepository: userRepository,
 		DB:              DB,
@@ -28,9 +27,10 @@ func NewUserServiceImpl(userRepository repository.UsersRepository, DB *sql.DB, v
 }
 
 func (service *UsersServiceImpl) Create(ctx context.Context, request users.UsersCreateRequest) users.UsersResponse {
-	err := service.validate.Struct(request)
-	helper.SetPanicError(err)
-
+	errValidation := service.validate.Struct(request)
+	if errValidation != nil {
+		panic(exception.NewBadRequestError(errValidation))
+	}
 	tx, err := service.DB.Begin()
 	helper.SetPanicError(err)
 	defer helper.Defer(tx)
@@ -55,8 +55,10 @@ func (service *UsersServiceImpl) Create(ctx context.Context, request users.Users
 }
 
 func (service *UsersServiceImpl) Update(ctx context.Context, Id int16, request users.UsersUpdateRequest) users.UsersResponse {
-	err := service.validate.Struct(request)
-	helper.SetPanicError(err)
+	errValidation := service.validate.Struct(request)
+	if errValidation != nil {
+		panic(exception.NewBadRequestError(fmt.Sprint(errValidation)))
+	}
 
 	tx, err := service.DB.Begin()
 	helper.SetPanicError(err)

@@ -9,7 +9,6 @@ import (
 	"golang-jwt/service"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/julienschmidt/httprouter"
 )
@@ -18,10 +17,9 @@ func main() {
 
 	//connect to mysql database
 	db := app.Database()
-
 	//validation
-	validate := validator.New()
-
+	validate := exception.NewValidation(db)
+	//validate := validator.New()
 	//repository
 	userRepository := repository.NewUsersRepositoryImpl()
 
