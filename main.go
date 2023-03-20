@@ -19,7 +19,6 @@ func main() {
 	db := app.Database()
 	//validation
 	validate := exception.NewValidation(db)
-	//validate := validator.New()
 	//repository
 	userRepository := repository.NewUsersRepositoryImpl()
 

@@ -4,12 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
+	"strconv"
+	"time"
 
 	exception "golang-jwt/exception/api"
 	"golang-jwt/helper"
 	"golang-jwt/model/entity"
+	"golang-jwt/model/web/token"
 	"golang-jwt/model/web/users"
 	"golang-jwt/repository"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UsersServiceImpl struct {
@@ -140,4 +146,37 @@ func (service *UsersServiceImpl) GetAll(ctx context.Context) []users.UsersRespon
 		usersResponse = append(usersResponse, users.UsersResponses(user))
 	}
 	return usersResponse
+}
+
+func (service *UsersServiceImpl) Auth(ctx context.Context, request users.UserAuthRequest) token.TokenResponse {
+	tx, err := service.DB.Begin()
+	helper.SetPanicError(err)
+	defer helper.Defer(tx)
+
+	user, err := service.UsersRepository.GetByEmail(ctx, tx, request.Email)
+	if err != nil {
+		panic(exception.NewUnauthorizedError(err.Error()))
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+	if err != nil {
+		panic(exception.NewUnauthorizedError(err.Error()))
+	}
+
+	jwtExpiredTimeToken, err := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_TOKEN"))
+	jwtExpiredTimeRefreshToken, err := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_REFRESH_TOKEN"))
+
+	tokenCreateRequest := users.UsersResponse{
+		Id:        user.Id,
+		Firstname: user.Firstname,
+		Lastname:  user.Lastname,
+		Email:     user.Email,
+	}
+
+	token := token.TokenResponse{
+		Token:        helper.CreateToken(tokenCreateRequest, time.Duration(jwtExpiredTimeToken)),
+		RefreshToken: helper.CreateToken(tokenCreateRequest, time.Duration(jwtExpiredTimeRefreshToken)),
+	}
+
+	return token
 }

@@ -25,7 +25,7 @@ func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request 
 	} else {
 		tokenAuth := request.Header.Get("Authorization")
 		if tokenAuth == "" {
-			panic(exception.NewUnautorizedRequestError("User Unautorized"))
+			panic(exception.NewUnauthorizedError("User Unautorized"))
 		}
 
 		var jwtTokenSecret = []byte(os.Getenv("JWT_TOKEN_SECRET"))
@@ -38,12 +38,12 @@ func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request 
 
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
-				panic(exception.NewUnautorizedRequestError(err.Error()))
+				panic(exception.NewUnauthorizedError(err.Error()))
 			}
 		}
 
 		if !token.Valid {
-			panic(exception.NewUnautorizedRequestError(err.Error()))
+			panic(exception.NewUnauthorizedError(err.Error()))
 		}
 
 		middleware.Handler.ServeHTTP(writer, request)

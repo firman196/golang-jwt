@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"golang-jwt/model/web/token"
 	"golang-jwt/model/web/users"
 )
 
@@ -10,6 +11,6 @@ type UsersService interface {
 	Update(ctx context.Context, Id int16, request users.UsersUpdateRequest) users.UsersResponse
 	Delete(ctx context.Context, Id int16) bool
 	GetById(ctx context.Context, Id int16) users.UsersResponse
-	//GetByEmail(ctx context.Context, email string) users.UsersResponse
+	Auth(ctx context.Context, request users.UserAuthRequest) token.TokenResponse
 	GetAll(ctx context.Context) []users.UsersResponse
 }
