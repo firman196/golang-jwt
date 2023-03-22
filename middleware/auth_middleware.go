@@ -1,7 +1,8 @@
 package middleware
 
 import (
-	exception "golang-jwt/exception/api"
+	"golang-jwt/helper"
+	"golang-jwt/model/web"
 	"golang-jwt/model/web/token"
 	"net/http"
 	"os"
@@ -19,34 +20,49 @@ func NewAuthMiddleware(handler http.Handler) *AuthMiddleware {
 	}
 }
 
+func (middleware *AuthMiddleware) unauthorized(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusUnauthorized)
+
+	webResponse := web.GeneralResponse{
+		Status: "Unauthorized",
+	}
+
+	helper.JsonEncode(writer, webResponse)
+}
+
 func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	if request.Method == "POST" && (request.RequestURI == "/api/v1/user" || request.RequestURI == "/api/v1/auth") {
+	if request.Method == "POST" && (request.RequestURI == "/api/V1/user" || request.RequestURI == "/api/V1/auth") {
 		middleware.Handler.ServeHTTP(writer, request)
 	} else {
 		tokenAuth := request.Header.Get("Authorization")
 		if tokenAuth == "" {
-			panic(exception.NewUnauthorizedError("User Unautorized"))
+			middleware.unauthorized(writer, request)
+			return
 		}
 
 		var jwtTokenSecret = []byte(os.Getenv("JWT_TOKEN_SECRET"))
 
 		claims := &token.TokenClaims{}
 
-		token, err := jwt.ParseWithClaims(tokenAuth, claims, func(t *jwt.Token) (interface{}, error) {
-			return jwtTokenSecret, nil
-		})
+		token, err := jwt.ParseWithClaims(tokenAuth, claims,
+			func(t *jwt.Token) (interface{}, error) {
+				return jwtTokenSecret, nil
+			},
+		)
 
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
-				panic(exception.NewUnauthorizedError(err.Error()))
+				middleware.unauthorized(writer, request)
+				return
 			}
 		}
 
 		if !token.Valid {
-			panic(exception.NewUnauthorizedError(err.Error()))
+			middleware.unauthorized(writer, request)
+			return
 		}
 
 		middleware.Handler.ServeHTTP(writer, request)
 	}
-
 }

@@ -5,6 +5,7 @@ import (
 	"golang-jwt/controller"
 	exception "golang-jwt/exception/api"
 	"golang-jwt/helper"
+	"golang-jwt/middleware"
 	"golang-jwt/repository"
 	"golang-jwt/service"
 	"net/http"
@@ -36,6 +37,7 @@ func main() {
 
 	//router API
 	router.POST("/api/V1/user", userController.Create)
+	router.POST("/api/V1/auth", userController.Auth)
 	router.PUT("/api/V1/user/:id", userController.Update)
 	router.DELETE("/api/V1/user/:id", userController.Delete)
 	router.GET("/api/V1/user/:id", userController.GetById)
@@ -44,9 +46,9 @@ func main() {
 	router.PanicHandler = exception.ErrorHandler
 
 	server := http.Server{
-		Addr:    "localhost:9000",
-		Handler: router,
-		//Handler: middleware.NewAuthMiddleware(router),
+		Addr: "localhost:9000",
+		//Handler: router,
+		Handler: middleware.NewAuthMiddleware(router),
 	}
 
 	err := server.ListenAndServe()

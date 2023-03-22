@@ -87,7 +87,7 @@ func (repository *UsersRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, 
 }
 
 func (repository UsersRepositoryImpl) GetByEmail(ctx context.Context, tx *sql.Tx, email string) (entity.Users, error) {
-	SQL := "SELECT id, first_name, last_name, email FROM users WHERE email = ?"
+	SQL := "SELECT id, firstname, lastname, email FROM users WHERE email = ?"
 
 	rows, err := tx.QueryContext(
 		ctx,

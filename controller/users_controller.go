@@ -12,4 +12,5 @@ type UsersController interface {
 	Delete(writer http.ResponseWriter, request *http.Request, param httprouter.Params)
 	GetById(writer http.ResponseWriter, request *http.Request, param httprouter.Params)
 	GetAll(writer http.ResponseWriter, request *http.Request, param httprouter.Params)
+	Auth(writer http.ResponseWriter, request *http.Request, param httprouter.Params)
 }

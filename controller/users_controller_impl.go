@@ -84,3 +84,16 @@ func (controller *UsersControllerImpl) GetAll(writer http.ResponseWriter, reques
 
 	helper.JsonEncode(writer, response)
 }
+func (controller *UsersControllerImpl) Auth(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	userAuthRequest := users.UserAuthRequest{}
+	helper.JsonDecode(request, &userAuthRequest)
+
+	response := controller.UsersService.Auth(request.Context(), userAuthRequest)
+
+	webResponse := web.GeneralResponse{
+		Status: "success",
+		Data:   response,
+	}
+
+	helper.JsonEncode(writer, webResponse)
+}
