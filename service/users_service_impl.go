@@ -159,12 +159,13 @@ func (service *UsersServiceImpl) Auth(ctx context.Context, request users.UserAut
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+
 	if err != nil {
 		panic(exception.NewUnauthorizedError(err.Error()))
 	}
 
-	jwtExpiredTimeToken, err := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_TOKEN"))
-	jwtExpiredTimeRefreshToken, err := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_REFRESH_TOKEN"))
+	jwtExpiredTimeToken, _ := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_TOKEN"))
+	jwtExpiredTimeRefreshToken, _ := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_REFRESH_TOKEN"))
 
 	tokenCreateRequest := users.UsersResponse{
 		Id:        user.Id,
