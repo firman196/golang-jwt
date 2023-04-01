@@ -1,20 +1,11 @@
-package exception
+package api
 
 import (
-	"golang-jwt/helper"
 	"golang-jwt/model/web"
+	"golang-jwt/utils"
+
 	"net/http"
 )
-
-type BadRequestError struct {
-	Error string
-}
-
-func NewBadRequestError(error string) BadRequestError {
-	return BadRequestError{
-		Error: error,
-	}
-}
 
 func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interface{}) {
 	if badRequest(writer, request, err) {
@@ -22,6 +13,10 @@ func ErrorHandler(writer http.ResponseWriter, request *http.Request, err interfa
 	}
 
 	if notFound(writer, request, err) {
+		return
+	}
+
+	if unauthorized(writer, request, err) {
 		return
 	}
 
@@ -40,7 +35,7 @@ func badRequest(writer http.ResponseWriter, request *http.Request, error interfa
 			Data:   exception.Error,
 		}
 
-		helper.JsonEncode(writer, response)
+		utils.JsonEncode(writer, response)
 		return true
 	} else {
 		return false
@@ -59,7 +54,7 @@ func notFound(writer http.ResponseWriter, request *http.Request, error interface
 			Data:   exception.Error,
 		}
 
-		helper.JsonEncode(writer, response)
+		utils.JsonEncode(writer, response)
 		return true
 	} else {
 		return false
@@ -74,5 +69,23 @@ func internalServerError(writer http.ResponseWriter, request *http.Request, erro
 		Data:   error,
 	}
 
-	helper.JsonEncode(writer, response)
+	utils.JsonEncode(writer, response)
+}
+
+func unauthorized(writer http.ResponseWriter, request *http.Request, error interface{}) bool {
+	exception, err := error.(UnauthorizedError)
+	if err {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusBadRequest)
+		response := web.GeneralResponse{
+			Status: "Unautorized",
+			Data:   exception.Error,
+		}
+
+		utils.JsonEncode(writer, response)
+		return true
+	} else {
+		return false
+	}
+
 }

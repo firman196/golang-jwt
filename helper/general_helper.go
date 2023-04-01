@@ -1,21 +1,18 @@
 package helper
 
-import "database/sql"
-
-func SetPanicError(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
+import (
+	"database/sql"
+	"golang-jwt/utils"
+)
 
 func Defer(tx *sql.Tx) {
 	err := recover()
 	if err != nil {
 		errRollback := tx.Rollback()
-		SetPanicError(errRollback)
+		utils.SetPanicError(errRollback)
 		panic(err)
 	} else {
 		errCommit := tx.Commit()
-		SetPanicError(errCommit)
+		utils.SetPanicError(errCommit)
 	}
 }

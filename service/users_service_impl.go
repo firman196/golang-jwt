@@ -3,23 +3,29 @@ package service
 import (
 	"context"
 	"database/sql"
-
-	"github.com/go-playground/validator/v10"
+	"fmt"
+	"os"
+	"strconv"
+	"time"
 
 	exception "golang-jwt/exception/api"
 	"golang-jwt/helper"
 	"golang-jwt/model/entity"
+	"golang-jwt/model/web/token"
 	"golang-jwt/model/web/users"
 	"golang-jwt/repository"
+	"golang-jwt/utils"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UsersServiceImpl struct {
 	UsersRepository repository.UsersRepository
 	DB              *sql.DB
-	validate        *validator.Validate
+	validate        *exception.Validation
 }
 
-func NewUserServiceImpl(userRepository repository.UsersRepository, DB *sql.DB, validate *validator.Validate) UsersService {
+func NewUserServiceImpl(userRepository repository.UsersRepository, DB *sql.DB, validate *exception.Validation) UsersService {
 	return &UsersServiceImpl{
 		UsersRepository: userRepository,
 		DB:              DB,
@@ -28,15 +34,16 @@ func NewUserServiceImpl(userRepository repository.UsersRepository, DB *sql.DB, v
 }
 
 func (service *UsersServiceImpl) Create(ctx context.Context, request users.UsersCreateRequest) users.UsersResponse {
-	err := service.validate.Struct(request)
-	helper.SetPanicError(err)
-
+	errValidation := service.validate.Struct(request)
+	if errValidation != nil {
+		panic(exception.NewBadRequestError(errValidation))
+	}
 	tx, err := service.DB.Begin()
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer helper.Defer(tx)
 
 	passwordHash, err := helper.HashPassword(request.Password)
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 
 	user := entity.Users{
 		Firstname: request.Firstname,
@@ -54,18 +61,20 @@ func (service *UsersServiceImpl) Create(ctx context.Context, request users.Users
 	return users.UsersResponses(user)
 }
 
-func (service *UsersServiceImpl) Update(ctx context.Context, request users.UsersUpdateRequest) users.UsersResponse {
-	err := service.validate.Struct(request)
-	helper.SetPanicError(err)
+func (service *UsersServiceImpl) Update(ctx context.Context, Id int16, request users.UsersUpdateRequest) users.UsersResponse {
+	errValidation := service.validate.Struct(request)
+	if errValidation != nil {
+		panic(exception.NewBadRequestError(fmt.Sprint(errValidation)))
+	}
 
 	tx, err := service.DB.Begin()
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer helper.Defer(tx)
 
 	user, err := service.UsersRepository.GetById(
 		ctx,
 		tx,
-		request.Id,
+		Id,
 	)
 	if err != nil {
 		panic(exception.NewBadRequestError(err.Error()))
@@ -77,6 +86,7 @@ func (service *UsersServiceImpl) Update(ctx context.Context, request users.Users
 	user = service.UsersRepository.Update(
 		ctx,
 		tx,
+		Id,
 		user,
 	)
 
@@ -85,7 +95,7 @@ func (service *UsersServiceImpl) Update(ctx context.Context, request users.Users
 
 func (service *UsersServiceImpl) Delete(ctx context.Context, Id int16) bool {
 	tx, err := service.DB.Begin()
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer helper.Defer(tx)
 
 	user, err := service.UsersRepository.GetById(
@@ -109,7 +119,7 @@ func (service *UsersServiceImpl) Delete(ctx context.Context, Id int16) bool {
 
 func (service *UsersServiceImpl) GetById(ctx context.Context, Id int16) users.UsersResponse {
 	tx, err := service.DB.Begin()
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer helper.Defer(tx)
 
 	user, err := service.UsersRepository.GetById(
@@ -125,7 +135,7 @@ func (service *UsersServiceImpl) GetById(ctx context.Context, Id int16) users.Us
 
 func (service *UsersServiceImpl) GetAll(ctx context.Context) []users.UsersResponse {
 	tx, err := service.DB.Begin()
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer helper.Defer(tx)
 
 	usersVal := service.UsersRepository.GetAll(
@@ -137,4 +147,74 @@ func (service *UsersServiceImpl) GetAll(ctx context.Context) []users.UsersRespon
 		usersResponse = append(usersResponse, users.UsersResponses(user))
 	}
 	return usersResponse
+}
+
+func (service *UsersServiceImpl) Auth(ctx context.Context, request users.UserAuthRequest) token.TokenResponse {
+	tx, err := service.DB.Begin()
+	utils.SetPanicError(err)
+	defer helper.Defer(tx)
+
+	user, err := service.UsersRepository.GetByEmail(ctx, tx, request.Email)
+	if err != nil {
+		panic(exception.NewUnauthorizedError(err.Error()))
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
+
+	if err != nil {
+		panic(exception.NewUnauthorizedError(err.Error()))
+	}
+	fmt.Println(os.Getenv("JWT_TOKEN_SECRET"))
+	jwtExpiredTimeToken, _ := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_TOKEN"))
+	jwtExpiredTimeRefreshToken, _ := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_REFRESH_TOKEN"))
+
+	tokenCreateRequest := users.UsersResponse{
+		Id:        user.Id,
+		Firstname: user.Firstname,
+		Lastname:  user.Lastname,
+		Email:     user.Email,
+	}
+
+	token := token.TokenResponse{
+		Token:        helper.CreateToken(tokenCreateRequest, time.Duration(jwtExpiredTimeToken)),
+		RefreshToken: helper.CreateToken(tokenCreateRequest, time.Duration(jwtExpiredTimeRefreshToken)),
+	}
+
+	return token
+}
+
+func (service *UsersServiceImpl) RefreshToken(ctx context.Context, refreshToken string) token.TokenResponse {
+	tx, err := service.DB.Begin()
+	utils.SetPanicError(err)
+	defer helper.Defer(tx)
+
+	claims := helper.TokenClaims(refreshToken)
+
+	_, err = service.UsersRepository.GetById(ctx, tx, claims.Id)
+	if err != nil {
+		panic(exception.NewUnauthorizedError(err.Error()))
+	}
+
+	tokenCreateRequest := users.UsersResponse{
+		Id:        claims.Id,
+		Email:     claims.Email,
+		Firstname: claims.Firstname,
+		Lastname:  claims.Lastname,
+	}
+
+	JWTExpiredTimeToken, err := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_TOKEN"))
+	JWTExpiredTimeRefreshToken, err := strconv.Atoi(os.Getenv("JWT_EXPIRED_TIME_REFRESH_TOKEN"))
+
+	token := token.TokenResponse{
+		Token: helper.CreateToken(
+			tokenCreateRequest,
+			time.Duration(JWTExpiredTimeToken),
+		),
+		RefreshToken: helper.CreateToken(
+			tokenCreateRequest,
+			time.Duration(JWTExpiredTimeRefreshToken),
+		),
+	}
+
+	return token
 }
