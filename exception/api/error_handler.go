@@ -1,8 +1,9 @@
 package api
 
 import (
-	"golang-jwt/helper"
 	"golang-jwt/model/web"
+	"golang-jwt/utils"
+
 	"net/http"
 )
 
@@ -34,7 +35,7 @@ func badRequest(writer http.ResponseWriter, request *http.Request, error interfa
 			Data:   exception.Error,
 		}
 
-		helper.JsonEncode(writer, response)
+		utils.JsonEncode(writer, response)
 		return true
 	} else {
 		return false
@@ -53,7 +54,7 @@ func notFound(writer http.ResponseWriter, request *http.Request, error interface
 			Data:   exception.Error,
 		}
 
-		helper.JsonEncode(writer, response)
+		utils.JsonEncode(writer, response)
 		return true
 	} else {
 		return false
@@ -68,7 +69,7 @@ func internalServerError(writer http.ResponseWriter, request *http.Request, erro
 		Data:   error,
 	}
 
-	helper.JsonEncode(writer, response)
+	utils.JsonEncode(writer, response)
 }
 
 func unauthorized(writer http.ResponseWriter, request *http.Request, error interface{}) bool {
@@ -81,7 +82,7 @@ func unauthorized(writer http.ResponseWriter, request *http.Request, error inter
 			Data:   exception.Error,
 		}
 
-		helper.JsonEncode(writer, response)
+		utils.JsonEncode(writer, response)
 		return true
 	} else {
 		return false

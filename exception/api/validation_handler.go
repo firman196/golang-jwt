@@ -2,7 +2,7 @@ package api
 
 import (
 	"database/sql"
-	"golang-jwt/helper"
+	"golang-jwt/utils"
 	"reflect"
 	"strings"
 
@@ -84,7 +84,7 @@ func (v *Validation) Struct(s interface{}) interface{} {
 
 func (v *Validation) checkIsUnique(table_name string, field_name string, field_value string) bool {
 	tx, err := v.DB.Begin()
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 
 	SQL := "SELECT " + field_name + " FROM " + table_name + " WHERE " + field_name + " = ?"
 	rows, err := tx.Query(
@@ -92,13 +92,13 @@ func (v *Validation) checkIsUnique(table_name string, field_name string, field_v
 		field_value,
 	)
 
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer rows.Close()
 
 	result := field_name
 	if rows.Next() {
 		err := rows.Scan(&result)
-		helper.SetPanicError(err)
+		utils.SetPanicError(err)
 	}
 
 	return result != field_value

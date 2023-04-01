@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"golang-jwt/helper"
 	"golang-jwt/model/entity"
+	"golang-jwt/utils"
 )
 
 type UsersRepositoryImpl struct{}
@@ -25,7 +25,7 @@ func (repository *UsersRepositoryImpl) Create(ctx context.Context, tx *sql.Tx, u
 		user.Email,
 		user.Password,
 	)
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	return user
 }
 
@@ -41,7 +41,7 @@ func (repository *UsersRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, u
 		user.Id,
 	)
 
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	return user
 }
 
@@ -54,8 +54,7 @@ func (repository *UsersRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, u
 		userId,
 	)
 
-	helper.SetPanicError(err)
-
+	utils.SetPanicError(err)
 	return true
 }
 
@@ -67,7 +66,7 @@ func (repository *UsersRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, 
 		userId,
 	)
 
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer rows.Close()
 
 	user := entity.Users{}
@@ -79,7 +78,7 @@ func (repository *UsersRepositoryImpl) GetById(ctx context.Context, tx *sql.Tx, 
 			&user.Email,
 		)
 
-		helper.SetPanicError(err)
+		utils.SetPanicError(err)
 		return user, nil
 	} else {
 		return user, errors.New("user not found")
@@ -95,7 +94,7 @@ func (repository UsersRepositoryImpl) GetByEmail(ctx context.Context, tx *sql.Tx
 		email,
 	)
 
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer rows.Close()
 
 	user := entity.Users{}
@@ -107,7 +106,7 @@ func (repository UsersRepositoryImpl) GetByEmail(ctx context.Context, tx *sql.Tx
 			&user.Email,
 			&user.Password,
 		)
-		helper.SetPanicError(err)
+		utils.SetPanicError(err)
 
 		return user, nil
 	} else {
@@ -122,7 +121,7 @@ func (repository *UsersRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) [
 		SQL,
 	)
 
-	helper.SetPanicError(err)
+	utils.SetPanicError(err)
 	defer rows.Close()
 
 	var users []entity.Users
@@ -134,11 +133,9 @@ func (repository *UsersRepositoryImpl) GetAll(ctx context.Context, tx *sql.Tx) [
 			&user.Lastname,
 			&user.Email,
 		)
-		helper.SetPanicError(err)
-
+		utils.SetPanicError(err)
 		users = append(users, user)
 	}
 
 	return users
-
 }

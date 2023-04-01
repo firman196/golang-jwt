@@ -13,4 +13,5 @@ type UsersService interface {
 	GetById(ctx context.Context, Id int16) users.UsersResponse
 	Auth(ctx context.Context, request users.UserAuthRequest) token.TokenResponse
 	GetAll(ctx context.Context) []users.UsersResponse
+	RefreshToken(ctx context.Context, refreshToken string) token.TokenResponse
 }

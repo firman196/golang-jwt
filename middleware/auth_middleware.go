@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"golang-jwt/helper"
 	"golang-jwt/model/web"
 	"golang-jwt/model/web/token"
+	"golang-jwt/utils"
 	"net/http"
 	"os"
 
@@ -28,7 +28,7 @@ func (middleware *AuthMiddleware) unauthorized(writer http.ResponseWriter, reque
 		Status: "Unauthorized",
 	}
 
-	helper.JsonEncode(writer, webResponse)
+	utils.JsonEncode(writer, webResponse)
 }
 
 func (middleware *AuthMiddleware) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
